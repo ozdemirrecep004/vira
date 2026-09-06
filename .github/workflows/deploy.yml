@@ -1,0 +1,48 @@
+name: VIRA Deploy
+
+on:
+  push:
+    branches:
+      - Ana
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodu indir
+        uses: actions/checkout@v4
+
+      - name: Node.js kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Paketleri kur
+        run: npm install
+
+      - name: VIRA'yı derle
+        run: npm run build
+
+      - name: Pages için yükle
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: VIRA'yı yayınla
+        id: deployment
+        uses: actions/deploy-pages@v4
